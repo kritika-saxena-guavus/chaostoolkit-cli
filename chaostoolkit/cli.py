@@ -25,10 +25,10 @@ import logzero
 from logzero import logger
 from pkg_resources import iter_entry_points
 
-from chaostoolkit import __version__
+from chaostoolkit import __version__, node_manager_wrapper
 from chaostoolkit.check import check_newer_version
 
-
+logger.debug(check_newer_version)
 __all__ = ["cli"]
 
 
@@ -128,6 +128,7 @@ def run(ctx: click.Context, source: str, journal_path: str = "./journal.json",
     has_deviated = False
     has_failed = False
 
+    node_manager_wrapper.initialize()
     try:
         experiment = load_experiment(
             click.format_filename(source), settings)
