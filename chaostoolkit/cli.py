@@ -1,17 +1,18 @@
 # -*- coding: utf-8 -*-
-from datetime import date, datetime
 import decimal
 import io
 import json
 import logging
 import os
-import sys
-from typing import List
 import uuid
+from datetime import date, datetime
+from typing import List
 
+import click
+import logzero
 from chaoslib import __version__ as chaoslib_version
-from chaoslib.exceptions import ChaosException, DiscoveryFailed, InvalidSource
 from chaoslib.discovery import discover as disco
+from chaoslib.exceptions import ChaosException, DiscoveryFailed, InvalidSource
 from chaoslib.experiment import ensure_experiment_is_valid, run_experiment
 from chaoslib.info import list_extensions
 from chaoslib.loader import load_experiment
@@ -19,14 +20,11 @@ from chaoslib.notification import notify, DiscoverFlowEvent, InitFlowEvent, \
     RunFlowEvent, ValidateFlowEvent
 from chaoslib.settings import load_settings, CHAOSTOOLKIT_CONFIG_PATH
 from chaoslib.types import Activity, Discovery, Experiment, Journal
-import click
+from chaostoolkit import __version__
+from chaostoolkit.check import check_newer_version
 from click_plugins import with_plugins
-import logzero
 from logzero import logger
 from pkg_resources import iter_entry_points
-
-from chaostoolkit import __version__, node_manager_wrapper
-from chaostoolkit.check import check_newer_version
 
 logger.debug(check_newer_version)
 __all__ = ["cli"]
@@ -72,7 +70,7 @@ def cli(ctx: click.Context, verbose: bool = False,
         settings: str = CHAOSTOOLKIT_CONFIG_PATH):
     if verbose:
         logzero.loglevel(logging.DEBUG, update_custom_handlers=False)
-        fmt = "%(color)s[%(asctime)s %(levelname)s] "\
+        fmt = "%(color)s[%(asctime)s %(levelname)s] " \
               "[%(module)s:%(lineno)d]%(end_color)s %(message)s"
     else:
         logzero.loglevel(logging.INFO, update_custom_handlers=False)
@@ -128,7 +126,6 @@ def run(ctx: click.Context, source: str, journal_path: str = "./journal.json",
     has_deviated = False
     has_failed = False
 
-    node_manager_wrapper.initialize()
     try:
         experiment = load_experiment(
             click.format_filename(source), settings)
@@ -437,8 +434,8 @@ def add_activities(activities: List[Activity], pool: List[Activity],
         'Add an activity', fg='green'))
     echo("\n".join([
         "{i}) {t}".format(
-            i=idx+1, t=name) for (idx, (name, a)) in enumerate(
-                activities)]))
+            i=idx + 1, t=name) for (idx, (name, a)) in enumerate(
+            activities)]))
     activity_index = click.prompt(s(
         "Activity (0 to escape)", fg='green'), type=int)
     if not activity_index:
